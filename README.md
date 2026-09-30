@@ -1,6 +1,6 @@
-# AI Agents: From Zero to Your First Working Agent
+# AI Agents: From Zero to Your First Working Agent (100% Free)
 
-This is a complete guide to AI agents. It starts with **what an AI agent is** and ends with **an agent you built and ran yourself**, and then goes on to the more advanced ideas.
+This is a complete guide in simple English. It starts with **what an AI agent is** and ends with **an agent you built and ran yourself**, and then goes on to the more advanced ideas.
 
 - No AI knowledge needed. We explain every word the first time we use it.
 - No paid API or credit card. Everything uses **free** models.
@@ -12,16 +12,23 @@ Read it from top to bottom. By the end you will not need any other tutorial to u
 
 ## How This Guide Is Organized
 
-```text
- PART 1: UNDERSTAND          PART 2: BUILD                 PART 3: GO DEEPER
- ──────────────────          ─────────────                 ────────────────
- What is an LLM?             Install Python + Ollama       Types of agents
- What is an AI agent?        Step 1: plain LLM             Memory in depth
- The 5 parts of an agent     Step 2: tools                 Multi-agent systems
- How the loop works          Step 3: model asks for tool   How agents talk (MCP, A2A)
-                             Step 4: the agent loop        What goes wrong + fixes
-                             Step 5: free cloud models     When NOT to use an agent
-                             Exercise: your own tool
+> **About the diagrams:** the diagrams in this guide are written in [Mermaid](https://mermaid.js.org). GitHub shows them as real pictures automatically. In VS Code, install the **Markdown Preview Mermaid Support** extension and open the Markdown preview (`Cmd + Shift + V` on macOS, `Ctrl + Shift + V` on Windows/Linux).
+
+```mermaid
+flowchart LR
+  subgraph P1["📘 PART 1: UNDERSTAND"]
+    direction TB
+    a1["What is an LLM?"] --> a2["What is an AI agent?"] --> a3["The 5 parts of an agent"] --> a4["How the loop works"]
+  end
+  subgraph P2["🛠️ PART 2: BUILD"]
+    direction TB
+    b1["Install Python + Ollama"] --> b2["Step 1: plain LLM"] --> b3["Step 2: tools"] --> b4["Step 3: model asks for a tool"] --> b5["Step 4: the agent loop"] --> b6["Step 5: free cloud models"] --> b7["Exercise: your own tool"]
+  end
+  subgraph P3["🚀 PART 3: GO DEEPER"]
+    direction TB
+    c1["Types of agents"] --> c2["Memory in depth"] --> c3["Multi-agent systems"] --> c4["How agents talk: MCP, A2A"] --> c5["What goes wrong + fixes"] --> c6["When NOT to use an agent"]
+  end
+  P1 --> P2 --> P3
 ```
 
 ## Table of Contents
@@ -77,14 +84,9 @@ Read it from top to bottom. By the end you will not need any other tutorial to u
 
 An LLM does **one** thing: it reads some text and writes the text that should come next.
 
-```text
-          ┌──────────────────────┐
- text ──► │         LLM          │ ──► text
- (input)  │ (trained on a huge   │     (output)
-          │  amount of text)     │
-          └──────────────────────┘
-
- "What is the capital of France?"  ──►  "The capital of France is Paris."
+```mermaid
+flowchart LR
+  A["📝 Text in<br/><i>What is the capital of France?</i>"] --> B["🧠 LLM<br/>trained on a huge<br/>amount of text"] --> C["📝 Text out<br/><i>The capital of France is Paris.</i>"]
 ```
 
 An LLM is very smart, but on its own it has **three big limits**:
@@ -101,19 +103,12 @@ An **AI agent** removes all three limits.
 
 ## 2. LLM vs Chatbot vs AI Agent
 
-```text
- ┌─────────────────┐   ┌─────────────────┐   ┌──────────────────────────────┐
- │    PLAIN LLM    │   │     CHATBOT     │   │           AI AGENT           │
- ├─────────────────┤   ├─────────────────┤   ├──────────────────────────────┤
- │ Question in     │   │ LLM             │   │ LLM                          │
- │ Answer out      │   │ + memory of the │   │ + memory                     │
- │                 │   │   conversation  │   │ + TOOLS (can take actions)   │
- │                 │   │                 │   │ + LOOP (keeps working until  │
- │                 │   │                 │   │   the goal is done)          │
- ├─────────────────┤   ├─────────────────┤   ├──────────────────────────────┤
- │ Can: talk       │   │ Can: talk,      │   │ Can: talk, remember, THINK,  │
- │                 │   │ remember        │   │ ACT, CHECK RESULTS, REPEAT   │
- └─────────────────┘   └─────────────────┘   └──────────────────────────────┘
+```mermaid
+flowchart LR
+  L["<b>PLAIN LLM</b><br/>Question in, answer out<br/><br/>✅ Can: talk"]
+  C["<b>CHATBOT</b><br/>LLM + memory of the conversation<br/><br/>✅ Can: talk, remember"]
+  A["<b>AI AGENT</b><br/>LLM + memory<br/>+ TOOLS: can take actions<br/>+ LOOP: keeps working until the goal is done<br/><br/>✅ Can: talk, remember, THINK,<br/>ACT, CHECK RESULTS, REPEAT"]
+  L -- "+ memory" --> C -- "+ tools + loop" --> A
 ```
 
 The difference in one line:
@@ -138,16 +133,17 @@ Think of an AI agent as a **smart personal assistant** sitting at a desk.
 
 You say: *"Book me the cheapest flight to Mumbai for Friday."*
 
-```text
-                        ┌─────────────────────────────┐
-  You: "Book cheapest   │        THE ASSISTANT        │
-  flight to Mumbai" ──► │                             │
-                        │  Brain ......... thinks     │  ◄── LLM
-                        │  Instructions .. job rules  │  ◄── System prompt
-                        │  Phone/Laptop .. acts       │  ◄── Tools
-                        │  Notebook ...... remembers  │  ◄── Memory
-                        │  Keeps going ... until done │  ◄── Loop
-                        └─────────────────────────────┘
+```mermaid
+flowchart LR
+  U["🧑 You:<br/>Book the cheapest<br/>flight to Mumbai"] --> AS
+  subgraph AS["🤵 The Assistant = an AI Agent"]
+    direction TB
+    B["🧠 Brain: thinks<br/>→ LLM"]
+    I["📋 Instructions: job rules<br/>→ System prompt"]
+    T["💻 Phone / Laptop: acts<br/>→ Tools"]
+    M["📓 Notebook: remembers<br/>→ Memory"]
+    L["🔁 Keeps going until done<br/>→ Loop"]
+  end
 ```
 
 What the assistant does:
@@ -172,27 +168,17 @@ Nobody gave the assistant a fixed script. It **decided** each next step based on
 
 Every AI agent, from a small script to Claude Code or Cursor, is built from the same five parts.
 
-```text
-                     ┌───────────────────────────┐
-                     │  2. INSTRUCTIONS          │
-                     │  (system prompt: who you  │
-                     │   are, what rules to      │
-                     │   follow)                 │
-                     └─────────────┬─────────────┘
-                                   │
- ┌──────────────────┐     ┌────────▼────────┐     ┌──────────────────────┐
- │  4. MEMORY       │◄───►│  1. LLM         │◄───►│  3. TOOLS            │
- │  (what happened  │     │  (the BRAIN:    │     │  (the HANDS:         │
- │   so far)        │     │   decides what  │     │   weather, calculator│
- └──────────────────┘     │   to do next)   │     │   search, save file) │
-                          └────────▲────────┘     └──────────────────────┘
-                                   │
-                     ┌─────────────┴─────────────┐
-                     │  5. LOOP                  │
-                     │  (the ENGINE: keeps       │
-                     │   running until the goal  │
-                     │   is done)                │
-                     └───────────────────────────┘
+```mermaid
+flowchart TB
+  I["📋 <b>2. INSTRUCTIONS</b><br/>system prompt: who you are,<br/>what rules to follow"]
+  LLM["🧠 <b>1. LLM</b><br/>the BRAIN: decides<br/>what to do next"]
+  M["📓 <b>4. MEMORY</b><br/>what happened so far"]
+  T["🛠️ <b>3. TOOLS</b><br/>the HANDS: weather, calculator,<br/>search, save file"]
+  L["🔁 <b>5. LOOP</b><br/>the ENGINE: keeps running<br/>until the goal is done"]
+  I --> LLM
+  M <--> LLM
+  LLM <--> T
+  L --> LLM
 ```
 
 | # | Part | Simple meaning | In our project |
@@ -209,30 +195,14 @@ Every AI agent, from a small script to Claude Code or Cursor, is built from the 
 
 This loop is the heart of every agent.
 
-```text
-                         ┌─────────────┐
-            Goal ───────►│   THINK     │  LLM reads the goal + memory
-                         │  "What do I │  and decides the next step
-                         │  do next?"  │
-                         └──────┬──────┘
-                                │
-                 ┌──────────────┴──────────────┐
-                 │                             │
-         Need a tool?                    Goal is done?
-                 │                             │
-                 ▼                             ▼
-          ┌─────────────┐              ┌──────────────┐
-          │    ACT      │              │ FINAL ANSWER │──► User
-          │ Run the tool│              └──────────────┘
-          └──────┬──────┘
-                 │
-                 ▼
-          ┌─────────────┐
-          │  OBSERVE    │  Tool result is written into memory
-          │ Read result │
-          └──────┬──────┘
-                 │
-                 └────────► back to THINK (with the new information)
+```mermaid
+flowchart TD
+  G(["🎯 Goal from the user"]) --> TH
+  TH["🧠 <b>THINK</b><br/>LLM reads the goal + memory<br/>and decides the next step"] --> D{"Need a tool,<br/>or is the goal done?"}
+  D -- "Need a tool" --> ACT["🛠️ <b>ACT</b><br/>Your code runs the tool"]
+  ACT --> OBS["👀 <b>OBSERVE</b><br/>The tool result is<br/>written into memory"]
+  OBS -- "back to THINK<br/>with new information" --> TH
+  D -- "Goal is done" --> F(["✅ FINAL ANSWER → User"])
 ```
 
 Step by step:
@@ -259,32 +229,23 @@ How does the LLM know which tools exist? You send it a **description** of each t
 
 Here is the full conversation for one question, shown as a **sequence diagram** (read top to bottom):
 
-```text
-  USER              YOUR CODE (loop)               LLM                    TOOL
-   │                      │                         │                       │
-   │ "Weather in Delhi?"  │                         │                       │
-   │─────────────────────►│                         │                       │
-   │                      │ question + tool list    │                       │
-   │                      │────────────────────────►│                       │
-   │                      │                         │ thinks: "I need
-   │                      │                         │ live weather"
-   │                      │ TOOL CALL:              │                       │
-   │                      │ get_weather(city=Delhi) │                       │
-   │                      │◄────────────────────────│                       │
-   │                      │ runs get_weather("Delhi")                       │
-   │                      │────────────────────────────────────────────────►│
-   │                      │                              "33°C, sunny"      │
-   │                      │◄────────────────────────────────────────────────│
-   │                      │ tool result: "33°C..."  │                       │
-   │                      │────────────────────────►│                       │
-   │                      │                         │ thinks: "now I can
-   │                      │                         │ answer"
-   │                      │ FINAL: "It is 33°C and  │                       │
-   │                      │ sunny in Delhi."        │                       │
-   │                      │◄────────────────────────│                       │
-   │ "It is 33°C and      │                         │                       │
-   │  sunny in Delhi."    │                         │                       │
-   │◄─────────────────────│                         │                       │
+```mermaid
+sequenceDiagram
+  autonumber
+  actor U as User
+  participant C as Your Code (loop)
+  participant L as LLM
+  participant T as Tool (get_weather)
+  U->>C: "Weather in Delhi?"
+  C->>L: question + tool list
+  Note over L: thinks: "I need live weather"
+  L-->>C: TOOL CALL: get_weather(city="Delhi")
+  C->>T: runs get_weather("Delhi")
+  T-->>C: "33°C, sunny"
+  C->>L: tool result: "33°C, sunny"
+  Note over L: thinks: "Now I can answer"
+  L-->>C: FINAL: "It is 33°C and sunny in Delhi."
+  C-->>U: "It is 33°C and sunny in Delhi."
 ```
 
 **What a tool call looks like** (this is what the LLM actually sends back):
@@ -350,25 +311,16 @@ Nobody told the agent which tools to use or in what order. It **decided** to fet
 
 ### How the project fits together
 
-```text
-                         ┌───────────┐
-                         │   .env    │  PROVIDER=ollama / gemini / groq
-                         └─────┬─────┘
-                               │ read by
-                               ▼
- ┌──────────────┐        ┌───────────┐        ┌───────────────────────────┐
- │  tools.py    │        │ config.py │───────►│ LLM server                │
- │  functions + │        │ client +  │        │  • Ollama (your laptop)   │
- │  descriptions│        │ MODEL     │        │  • Gemini (Google cloud)  │
- └──────┬───────┘        └─────┬─────┘        │  • Groq (Groq cloud)      │
-        │                      │              └───────────────────────────┘
-        │   imported by        │ imported by
-        ▼                      ▼
- ┌──────────────────────────────────────────┐
- │ step1_chat.py   → LLM only (no tools)    │
- │ step2_tools.py  → LLM asks for a tool    │
- │ step3_agent.py  → the full agent loop    │
- └──────────────────────────────────────────┘
+```mermaid
+flowchart LR
+  ENV["⚙️ .env<br/>PROVIDER = ollama / gemini / groq"] -- "read by" --> CFG["📄 config.py<br/>client + MODEL"]
+  CFG --> SRV["☁️ LLM server<br/>• Ollama: your laptop<br/>• Gemini: Google cloud<br/>• Groq: Groq cloud"]
+  TOOLS["🛠️ tools.py<br/>functions + descriptions"]
+  CFG -- "imported by" --> S1["step1_chat.py<br/>LLM only, no tools"]
+  CFG --> S2["step2_tools.py<br/>LLM asks for a tool"]
+  CFG --> S3["step3_agent.py<br/>the full agent loop"]
+  TOOLS -- "imported by" --> S2
+  TOOLS --> S3
 ```
 
 ### Final folder structure
@@ -424,13 +376,13 @@ Before writing any code, here is **every file and folder** in the project in pla
 
 **Why split the code into several files instead of one big file?**
 
-```text
- config.py ──┐
-             ├──► step1_chat.py
-             ├──► step2_tools.py ◄──┐
-             └──► step3_agent.py ◄──┤
-                                    │
- tools.py ──────────────────────────┘
+```mermaid
+flowchart LR
+  CFG["📄 config.py<br/>written once"] --> S1["step1_chat.py"]
+  CFG --> S2["step2_tools.py"]
+  CFG --> S3["step3_agent.py"]
+  TL["🛠️ tools.py<br/>written once"] --> S2
+  TL --> S3
 ```
 
 - `config.py` is written **once** and reused by all three steps. Change the model in one place, and every step uses the new one.
@@ -481,15 +433,12 @@ If you see `Python 3.9` or higher, you are ready. Otherwise install it:
 
 [Ollama](https://ollama.com) lets you run open-source LLMs **on your own laptop**. It is free, needs no API key and works offline once a model is downloaded.
 
-```text
- ┌───────────────────────── YOUR LAPTOP ─────────────────────────┐
- │                                                               │
- │   step3_agent.py  ──── HTTP request ────►  Ollama server      │
- │   (your Python)   ◄─── model reply ──────  localhost:11434    │
- │                                            └─ qwen2.5:7b      │
- │                                                               │
- └───────────────────────────────────────────────────────────────┘
-          Nothing leaves your laptop. No key. No cost.
+```mermaid
+flowchart LR
+  subgraph LAP["💻 YOUR LAPTOP: nothing leaves it. No key. No cost."]
+    P["🐍 step3_agent.py<br/>your Python code"] -- "HTTP request" --> O["🦙 Ollama server<br/>localhost:11434<br/>model: qwen2.5:7b"]
+    O -- "model reply" --> P
+  end
 ```
 
 ### 10.1 Install Ollama
@@ -579,15 +528,16 @@ A **virtual environment** (venv) is a private box of Python packages just for th
 
 **Why do we need it?** Imagine project A needs version 1 of a package and project B needs version 2. If both install into the same global Python, one of them breaks. A venv gives each project its own separate box.
 
-```text
- WITHOUT venv                              WITH venv
- ────────────                              ─────────
- ┌──────────────────────────┐              ┌─────────────┐   ┌─────────────┐
- │  Global Python           │              │ Project A   │   │ AgentDemo   │
- │  package X v1 (Project A)│              │ venv        │   │ venv        │
- │  package X v2 (Project B)│  ✘ clash     │ X v1        │   │ openai      │
- └──────────────────────────┘              └─────────────┘   └─────────────┘
-                                                 ✔ no clash, each has its own
+```mermaid
+flowchart LR
+  subgraph W["❌ WITHOUT venv"]
+    G["Global Python<br/>package X v1 for Project A<br/>package X v2 for Project B<br/>⚠️ they clash"]
+  end
+  subgraph V["✅ WITH venv: each project has its own box"]
+    A["Project A venv<br/>package X v1"]
+    B["AgentDemo venv<br/>openai, python-dotenv"]
+  end
+  W ~~~ V
 ```
 
 ```bash
@@ -655,13 +605,9 @@ pip install -r requirements.txt
 | `install` | Download and install packages |
 | `-r requirements.txt` | "**r**ead the list of packages from this file" |
 
-```text
-  requirements.txt              pip                     PyPI (internet)            venv/
-  ┌──────────────┐        ┌────────────┐            ┌──────────────────┐     ┌──────────────┐
-  │ openai       │ ─────► │ reads list │ ─────────► │ downloads each   │ ──► │ packages     │
-  │ python-dotenv│        │            │            │ package + the    │     │ installed    │
-  └──────────────┘        └────────────┘            │ packages it needs│     │ here         │
-                                                    └──────────────────┘     └──────────────┘
+```mermaid
+flowchart LR
+  R["📄 requirements.txt<br/>openai<br/>python-dotenv"] --> P["📦 pip<br/>reads the list"] --> I["🌐 PyPI (internet)<br/>downloads each package<br/>+ the packages it needs"] --> V["🗂️ venv/<br/>packages installed here"]
 ```
 
 You will see many lines like `Collecting openai...` and `Successfully installed ...`. That is normal: `openai` also needs a few helper packages (like `httpx` and `pydantic`), and `pip` installs them automatically.
@@ -678,12 +624,9 @@ You should see `openai` and `python-dotenv` in the list.
 
 **Why a separate settings file?** API keys are like passwords. If you write them inside `config.py` and share your code or push it to GitHub, anyone can steal and misuse them. So we keep **settings and secrets in a separate file** (`.env`) and the **code** only reads from it.
 
-```text
-   .env (secret, stays on your laptop)          config.py (code, safe to share)
-  ┌───────────────────────────────┐            ┌───────────────────────────────┐
-  │ PROVIDER=gemini               │  ────────► │ os.getenv("PROVIDER")         │
-  │ GEMINI_API_KEY=AIza...xyz     │   read by  │ os.getenv("GEMINI_API_KEY")   │
-  └───────────────────────────────┘            └───────────────────────────────┘
+```mermaid
+flowchart LR
+  E["🔒 <b>.env</b> (secret, stays on your laptop)<br/>PROVIDER=gemini<br/>GEMINI_API_KEY=AIza...xyz"] -- "read by" --> C["📄 <b>config.py</b> (code, safe to share)<br/>os.getenv(#quot;PROVIDER#quot;)<br/>os.getenv(#quot;GEMINI_API_KEY#quot;)"]
 ```
 
 We create **two** files:
@@ -770,23 +713,16 @@ If you never use Git, this file does no harm. It is a good habit.
 
 This file creates **one client object** that the rest of the project uses.
 
-```text
-                      .env: PROVIDER = ?
-                              │
-          ┌───────────────────┼────────────────────┐
-          ▼                   ▼                    ▼
-      "ollama"            "gemini"              "groq"
-  localhost:11434   generativelanguage...   api.groq.com
-  no key needed     GEMINI_API_KEY          GROQ_API_KEY
-  qwen2.5:7b        gemini-2.5-flash        gpt-oss-20b
-          │                   │                    │
-          └───────────────────┼────────────────────┘
-                              ▼
-                client = OpenAI(base_url, api_key)
-                MODEL  = "..."
-                              │
-                              ▼
-               used by every step file, unchanged
+```mermaid
+flowchart TD
+  E{".env: PROVIDER = ?"}
+  E -- ollama --> O["🦙 Ollama<br/>localhost:11434<br/>no key needed<br/>qwen2.5:7b"]
+  E -- gemini --> G["✨ Gemini<br/>generativelanguage.googleapis.com<br/>GEMINI_API_KEY<br/>gemini-2.5-flash"]
+  E -- groq --> Q["⚡ Groq<br/>api.groq.com<br/>GROQ_API_KEY<br/>openai/gpt-oss-20b"]
+  O --> C["client = OpenAI(base_url, api_key)<br/>MODEL = model name"]
+  G --> C
+  Q --> C
+  C --> S(["Used by every step file, unchanged"])
 ```
 
 Switching provider only changes three values: the server address (`base_url`), the key (`api_key`) and the model name. The agent code never changes.
@@ -940,9 +876,13 @@ You will not run this file directly. The next steps import it.
 
 Before building an agent, see what a plain LLM can and cannot do.
 
-```text
-  You ──── "Temperature in Delhi now?" ────► LLM
-  You ◄─── "Sorry, I have no live data" ──── LLM      (no tools, no loop)
+```mermaid
+sequenceDiagram
+  actor Y as You
+  participant L as LLM
+  Y->>L: "Temperature in Delhi now?"
+  L-->>Y: "Sorry, I have no live data"
+  Note over Y,L: No tools, no loop
 ```
 
 Create **`step1_chat.py`**:
@@ -1056,21 +996,11 @@ please check a weather website or app...
 
 A **tool** is just a normal Python function. To let the model use it, you need two things:
 
-```text
- ┌───────────────────────────────┐      ┌────────────────────────────────┐
- │ 1. THE FUNCTION (for Python)  │      │ 2. THE DESCRIPTION (for LLM)   │
- ├───────────────────────────────┤      ├────────────────────────────────┤
- │ def get_weather(city):        │      │ name: "get_weather"            │
- │     ...call weather API...    │      │ description: "Gets the live    │
- │     return "33°C, sunny"      │      │   weather of a city"           │
- │                               │      │ parameters: { city: string }   │
- ├───────────────────────────────┤      ├────────────────────────────────┤
- │ Does the real work.           │      │ The LLM reads ONLY this.       │
- │ The LLM never sees it.        │      │ It decides based on this text. │
- └───────────────────────────────┘      └────────────────────────────────┘
-                 ▲                                       │
-                 └────── FUNCTIONS dict links the ───────┘
-                         name "get_weather" to the function
+```mermaid
+flowchart LR
+  F["<b>1️⃣ THE FUNCTION</b> (for Python)<br/><br/>def get_weather(city):<br/>call the weather API<br/>return #quot;33°C, sunny#quot;<br/><br/>Does the real work.<br/>The LLM never sees it."]
+  D["<b>2️⃣ THE DESCRIPTION</b> (for the LLM)<br/><br/>name: get_weather<br/>description: Gets the live weather of a city<br/>parameters: city (text)<br/><br/>The LLM reads ONLY this.<br/>It decides based on this text."]
+  D -- "the FUNCTIONS dict links the name<br/>get_weather to the real function" --> F
 ```
 
 Create **`tools.py`**:
@@ -1224,11 +1154,9 @@ Opens a web address, waits at most 10 seconds, and turns the JSON reply into a P
 
 **`get_weather(city)`: live weather in two API calls**
 
-```text
-  "Delhi" ──► Geocoding API ──► latitude 28.65, longitude 77.23
-                                           │
-                                           ▼
-                                  Weather API ──► 33.1°C, humidity 52%, wind 9.4 km/h
+```mermaid
+flowchart LR
+  C["🏙️ Delhi"] --> G["📍 Geocoding API<br/>where is Delhi?"] --> LL["latitude 28.65<br/>longitude 77.23"] --> W["🌦️ Weather API"] --> R["🌡️ 33.1°C, humidity 52%,<br/>wind 9.4 km/h"]
 ```
 
 1. The weather API needs coordinates, not a city name, so first we ask Open-Meteo's **geocoding** API: *"where is Delhi?"*
@@ -1267,8 +1195,9 @@ FUNCTIONS = {"get_weather": get_weather, ...}
 
 The LLM replies with the tool name as **text**, like `"get_weather"`. Python needs the **actual function**. This dictionary links the two:
 
-```text
-  LLM says: "get_weather"  ──►  FUNCTIONS["get_weather"]  ──►  get_weather  ──►  run it
+```mermaid
+flowchart LR
+  A["🧠 LLM says:<br/>#quot;get_weather#quot;"] --> B["FUNCTIONS[#quot;get_weather#quot;]"] --> C["get_weather<br/>the real function"] --> D["▶️ run it"]
 ```
 
 **Section C: `TOOLS`**
@@ -1302,11 +1231,17 @@ python -c "import tools; print(tools.get_weather('Delhi')); print(tools.calculat
 
 Send the same question as Step 1, but this time include the tool list.
 
-```text
-  You ──── question + TOOL LIST ─────────────► LLM
-  You ◄─── "call get_weather(city=Delhi)" ──── LLM     ◄── a request, not an answer!
-  You ──── run get_weather("Delhi") → "33°C"
-           ...and then? The LLM has not seen the result yet.
+```mermaid
+sequenceDiagram
+  participant Y as Your Code
+  participant L as LLM
+  participant T as Tool
+  Y->>L: question + TOOL LIST
+  L-->>Y: call get_weather(city="Delhi")
+  Note right of L: a request, not an answer!
+  Y->>T: run get_weather("Delhi")
+  T-->>Y: "33°C"
+  Note over Y,L: ...and then? The LLM has not seen the result yet.
 ```
 
 Create **`step2_tools.py`**:
@@ -1635,21 +1570,15 @@ Creates the memory, starting with the system prompt. This happens **once**, so m
 
 ### How `run_agent()` works
 
-```text
- history = [ system prompt, user question ]
-                     │
-                     ▼
-       ┌──► send history + TOOLS to the LLM   (THINK)
-       │             │
-       │     did the LLM ask for tool(s)?
-       │        │                 │
-       │       YES                NO ──► final answer → return it   (DONE)
-       │        │
-       │   1. save the LLM's request in history
-       │   2. run each requested tool                               (ACT)
-       │   3. save each result in history (role = "tool")           (OBSERVE)
-       │        │
-       └────────┘      repeat, at most MAX_STEPS times
+```mermaid
+flowchart TD
+  H["history = system prompt + user question"] --> S["🧠 <b>THINK</b><br/>send history + TOOLS to the LLM"]
+  S --> Q{"Did the LLM ask<br/>for any tools?"}
+  Q -- NO --> F(["✅ <b>DONE</b><br/>save the final answer<br/>and return it"])
+  Q -- YES --> A1["1. Save the LLM's tool request in history"]
+  A1 --> A2["🛠️ <b>ACT</b><br/>2. Run each requested tool"]
+  A2 --> A3["👀 <b>OBSERVE</b><br/>3. Save each result in history<br/>with role = tool"]
+  A3 -- "repeat, at most MAX_STEPS times" --> S
 ```
 
 | Line / concept | Why it matters |
@@ -1703,14 +1632,13 @@ Type `exit` to quit.
 
 ### Map it back to the theory
 
-```text
- THEORY (Part 1)            YOUR CODE
- ───────────────            ─────────
- 1. LLM (brain)       ───►  client + MODEL           (config.py)
- 2. Instructions      ───►  SYSTEM_PROMPT            (step3_agent.py)
- 3. Tools (hands)     ───►  FUNCTIONS + TOOLS        (tools.py)
- 4. Memory            ───►  history list             (step3_agent.py)
- 5. Loop (engine)     ───►  for step in range(...)   (run_agent)
+```mermaid
+flowchart LR
+  t1["🧠 1. LLM"] --> c1["client + MODEL<br/><i>config.py</i>"]
+  t2["📋 2. Instructions"] --> c2["SYSTEM_PROMPT<br/><i>step3_agent.py</i>"]
+  t3["🛠️ 3. Tools"] --> c3["FUNCTIONS + TOOLS<br/><i>tools.py</i>"]
+  t4["📓 4. Memory"] --> c4["history list<br/><i>step3_agent.py</i>"]
+  t5["🔁 5. Loop"] --> c5["for step in range(...)<br/><i>run_agent()</i>"]
 ```
 
 **Congratulations. You have built a working AI agent.** Every agent framework (LangChain, Google ADK, CrewAI, OpenAI Agents SDK) runs this same loop inside, with more features around it.
@@ -1831,9 +1759,9 @@ To go back to the local model, set `PROVIDER=ollama`.
 
 Adding a tool always takes the same **three steps**, all in `tools.py`:
 
-```text
-  1. Write the function   ──►   2. Add to FUNCTIONS   ──►   3. Describe it in TOOLS
-     (does the work)             (name → function)          (so the LLM knows it exists)
+```mermaid
+flowchart LR
+  A["1️⃣ Write the function<br/>it does the work"] --> B["2️⃣ Add it to FUNCTIONS<br/>name → function"] --> C["3️⃣ Describe it in TOOLS<br/>so the LLM knows it exists"]
 ```
 
 Example: a tool that converts Indian Rupees to US Dollars.
@@ -1892,19 +1820,11 @@ You have built a single agent. This part explains the bigger ideas you will hear
 
 Memory lets an agent keep track of what already happened.
 
-```text
- ┌──────────────────────────────────┐    ┌──────────────────────────────────┐
- │        SHORT-TERM MEMORY         │    │        LONG-TERM MEMORY          │
- ├──────────────────────────────────┤    ├──────────────────────────────────┤
- │ The current conversation         │    │ Saved outside the conversation   │
- │ (our `history` list)             │    │ (file, database, vector DB)      │
- │                                  │    │                                  │
- │ Sent to the LLM on every call    │    │ Looked up only when needed       │
- │ Lost when the program stops      │    │ Survives restarts                │
- │                                  │    │                                  │
- │ Like: what you remember from     │    │ Like: your diary or contact list │
- │ this meeting                     │    │                                  │
- └──────────────────────────────────┘    └──────────────────────────────────┘
+```mermaid
+flowchart LR
+  S["⚡ <b>SHORT-TERM MEMORY</b><br/><br/>The current conversation (our history list)<br/>Sent to the LLM on every call<br/>Lost when the program stops<br/><br/><i>Like: what you remember from this meeting</i>"]
+  L["💾 <b>LONG-TERM MEMORY</b><br/><br/>Saved outside the conversation<br/>(file, database, vector DB)<br/>Looked up only when needed<br/>Survives restarts<br/><br/><i>Like: your diary or contact list</i>"]
+  S ~~~ L
 ```
 
 **Problem:** LLMs have a **context window**, a maximum amount of text they can read at once. In a long chat, `history` grows until it no longer fits.
@@ -1946,19 +1866,10 @@ Thinks one step, acts, observes, thinks again. **This is what you built.**
 
 Makes the **whole plan first**, then does each step.
 
-```text
-            ┌──────────┐        ┌───────────────────────────┐
-  Goal ───► │ PLANNER  │ ─────► │ Plan:                     │
-            └──────────┘        │  1. Search flights        │
-                                │  2. Check calendar        │
-                                │  3. Pick best flight      │
-                                │  4. Book it               │
-                                └─────────────┬─────────────┘
-                                              ▼
-                                ┌───────────────────────────┐
-                                │ EXECUTOR runs step 1..4   │ ──► Result
-                                │ (can re-plan if needed)   │
-                                └───────────────────────────┘
+```mermaid
+flowchart LR
+  G(["🎯 Goal"]) --> P["🗺️ PLANNER"] --> PL["📋 Plan:<br/>Step 1: search flights<br/>Step 2: check calendar<br/>Step 3: pick the best flight<br/>Step 4: book it"] --> E["⚙️ EXECUTOR<br/>runs steps 1 to 4"] --> R(["✅ Result"])
+  E -. "re-plan if needed" .-> P
 ```
 
 **Best for:** long, complex tasks where a clear plan helps.
@@ -1967,10 +1878,11 @@ Makes the **whole plan first**, then does each step.
 
 Writes a draft, **criticizes its own work**, then improves it.
 
-```text
-  Goal ──► [ Write draft ] ──► [ Review: "What is wrong?" ] ──► [ Improve ] ──► Final
-                 ▲                                                   │
-                 └─────────────── repeat if not good enough ─────────┘
+```mermaid
+flowchart LR
+  G(["🎯 Goal"]) --> W["✍️ Write draft"] --> R["🔍 Review:<br/>what is wrong?"] --> I["🔧 Improve"] --> Q{"Good enough?"}
+  Q -- "No, repeat" --> R
+  Q -- Yes --> F(["✅ Final"])
 ```
 
 **Best for:** writing, code and anything where quality matters more than speed.
@@ -1979,14 +1891,13 @@ Writes a draft, **criticizes its own work**, then improves it.
 
 **RAG** means **Retrieval-Augmented Generation**: before answering, look up relevant documents and give them to the LLM. In **agentic** RAG, the agent **decides itself** whether it needs to search, what to search for, and whether to search again.
 
-```text
-  Question ──► Agent: "Do I need to look something up?"
-                  │                        │
-                 YES                       NO ──► Answer directly
-                  ▼
-          Search documents ──► "Is this enough?" ──NO──► search again (better query)
-                                      │
-                                     YES ──► Answer using the documents
+```mermaid
+flowchart TD
+  Q(["❓ Question"]) --> A{"Agent: do I need to<br/>look something up?"}
+  A -- NO --> D(["✅ Answer directly"])
+  A -- YES --> S["🔎 Search documents"] --> E{"Is this enough?"}
+  E -- "NO: search again<br/>with a better query" --> S
+  E -- YES --> F(["✅ Answer using the documents"])
 ```
 
 **Best for:** chat with your PDFs, company knowledge bases, support docs.
@@ -2011,19 +1922,13 @@ One agent doing everything gets confused, just like one person doing every job i
 
 **Example: a trip planner**
 
-```text
-                        ┌────────────────────────┐
-     "Plan a 3-day ───► │   MANAGER AGENT        │ ───► Final trip plan
-      Goa trip"         │   (orchestrator)       │
-                        └───┬────────┬────────┬──┘
-                            │        │        │
-                  ┌─────────▼──┐ ┌───▼──────┐ ┌▼─────────────┐
-                  │ FLIGHT     │ │ HOTEL    │ │ ACTIVITIES   │
-                  │ AGENT      │ │ AGENT    │ │ AGENT        │
-                  │ tools:     │ │ tools:   │ │ tools:       │
-                  │ search     │ │ search   │ │ maps,        │
-                  │ flights    │ │ hotels   │ │ reviews      │
-                  └────────────┘ └──────────┘ └──────────────┘
+```mermaid
+flowchart TD
+  U(["🧑 Plan a 3-day Goa trip"]) --> M["👔 <b>MANAGER AGENT</b><br/>(orchestrator)"]
+  M <--> F["✈️ <b>FLIGHT AGENT</b><br/>tool: search flights"]
+  M <--> H["🏨 <b>HOTEL AGENT</b><br/>tool: search hotels"]
+  M <--> A["🏖️ <b>ACTIVITIES AGENT</b><br/>tools: maps, reviews"]
+  M --> R(["📄 Final trip plan"])
 ```
 
 **Why use many agents?**
@@ -2053,9 +1958,9 @@ There are **four common ways** to connect agents.
 
 ### 22.1 Direct (one-to-one)
 
-```text
-  Agent A ─────────────► Agent B
-          ◄─────────────
+```mermaid
+flowchart LR
+  A["🤖 Agent A"] <--> B["🤖 Agent B"]
 ```
 
 Agents message each other directly, like a phone call.
@@ -2064,12 +1969,13 @@ Agents message each other directly, like a phone call.
 
 ### 22.2 Centralized (manager in the middle)
 
-```text
-            Agent A
-               │
-  Agent D ── MANAGER ── Agent B
-               │
-            Agent C
+```mermaid
+flowchart TD
+  M["👔 MANAGER"]
+  A["🤖 Agent A"] <--> M
+  B["🤖 Agent B"] <--> M
+  C["🤖 Agent C"] <--> M
+  D["🤖 Agent D"] <--> M
 ```
 
 Everyone talks only to the manager, like a team lead.
@@ -2078,10 +1984,11 @@ Everyone talks only to the manager, like a team lead.
 
 ### 22.3 Broadcast (one-to-many, publish/subscribe)
 
-```text
-                    ┌──► Agent B  (interested: acts)
-  Agent A ──────────┼──► Agent C  (not interested: ignores)
-  "New order #55"   └──► Agent D  (interested: acts)
+```mermaid
+flowchart LR
+  A["📢 Agent A<br/>New order no. 55"] --> B["🤖 Agent B<br/>interested: acts ✅"]
+  A --> C["🤖 Agent C<br/>not interested: ignores"]
+  A --> D["🤖 Agent D<br/>interested: acts ✅"]
 ```
 
 One agent announces something; any agent that cares reacts, like a group announcement.
@@ -2090,12 +1997,12 @@ One agent announces something; any agent that cares reacts, like a group announc
 
 ### 22.4 Shared Memory (blackboard)
 
-```text
-  Agent A ──write──►  ┌──────────────────────┐  ◄──read── Agent C
-                      │  SHARED BLACKBOARD   │
-  Agent B ──read───►  │  (common memory /    │  ◄──write─ Agent D
-                      │   database)          │
-                      └──────────────────────┘
+```mermaid
+flowchart LR
+  A["🤖 Agent A"] -- write --> BB[("📋 SHARED BLACKBOARD<br/>common memory / database")]
+  D["🤖 Agent D"] -- write --> BB
+  BB -- read --> B["🤖 Agent B"]
+  BB -- read --> C["🤖 Agent C"]
 ```
 
 Agents never message each other. They read and write a common space, like a shared whiteboard in an office.
@@ -2123,14 +2030,22 @@ A **protocol** is an agreed set of rules for talking, like everyone agreeing to 
 
 **Solution:** MCP is a standard way to connect an agent to tools and data. A tool provider builds **one MCP server**, and **any** MCP-compatible agent can use it.
 
-```text
-  WITHOUT MCP                              WITH MCP
-  ───────────                              ────────
-  Agent ──custom code──► GitHub            Agent ──► MCP ──┬──► GitHub server
-  Agent ──custom code──► Slack                             ├──► Slack server
-  Agent ──custom code──► Database                          └──► Database server
-
-  (new code for every tool)                (one standard, plug and play)
+```mermaid
+flowchart LR
+  subgraph WO["❌ WITHOUT MCP: new code for every tool"]
+    direction LR
+    A1["🤖 Agent"] -- custom code --> G1["GitHub"]
+    A1 -- custom code --> S1["Slack"]
+    A1 -- custom code --> D1["Database"]
+  end
+  subgraph WI["✅ WITH MCP: one standard, plug and play"]
+    direction LR
+    A2["🤖 Agent"] --> M["🔌 MCP"]
+    M --> G2["GitHub server"]
+    M --> S2["Slack server"]
+    M --> D2["Database server"]
+  end
+  WO ~~~ WI
 ```
 
 Think of MCP as the **USB-C port for AI tools**.
@@ -2141,25 +2056,21 @@ Think of MCP as the **USB-C port for AI tools**.
 
 **Solution:** A2A is a standard way for agents to discover each other, share tasks and send results, even across companies.
 
-```text
-  ┌──────────────────┐          A2A           ┌──────────────────┐
-  │ Your travel agent│ ◄────────────────────► │ Airline's booking│
-  │ (built with ADK) │   "book seat 12A"      │ agent (other co.)│
-  └──────────────────┘   "confirmed, PNR X"   └──────────────────┘
+```mermaid
+sequenceDiagram
+  participant Y as Your travel agent (built with ADK)
+  participant A as Airline booking agent (another company)
+  Y->>A: A2A: "Book seat 12A"
+  A-->>Y: A2A: "Confirmed, PNR X"
 ```
 
 ### 23.3 How they fit together
 
-```text
-                ┌─────────────┐        A2A        ┌─────────────┐
-                │   Agent 1   │ ◄───────────────► │   Agent 2   │
-                └──────┬──────┘  (agent ↔ agent)  └──────┬──────┘
-                       │ MCP                              │ MCP
-                       │ (agent ↔ tools)                  │
-                 ┌─────▼─────┐                      ┌─────▼─────┐
-                 │  Tools &  │                      │  Tools &  │
-                 │  data     │                      │  data     │
-                 └───────────┘                      └───────────┘
+```mermaid
+flowchart TB
+  A1["🤖 Agent 1"] <-->|"A2A: agent ↔ agent"| A2["🤖 Agent 2"]
+  A1 -->|"MCP: agent ↔ tools"| T1["🛠️ Tools and data"]
+  A2 -->|"MCP: agent ↔ tools"| T2["🛠️ Tools and data"]
 ```
 
 | | MCP | A2A |
@@ -2200,24 +2111,15 @@ Building the "happy path" is easy. Real agent work is mostly about handling what
 
 Agents are powerful but slower, costlier and less predictable than normal code.
 
-```text
-                   Does the task need multiple steps?
-                          │               │
-                         NO              YES
-                          │               │
-                          ▼               ▼
-              Single LLM call     Are the steps always the same?
-              is enough                 │              │
-                                       YES             NO
-                                        │              │
-                                        ▼              ▼
-                           Normal code / fixed    Next step depends on the
-                           pipeline (no agent)    result of the previous one?
-                                                         │
-                                                        YES
-                                                         │
-                                                         ▼
-                                                  ✔ USE AN AGENT
+```mermaid
+flowchart TD
+  Q1{"Does the task need<br/>multiple steps?"}
+  Q1 -- NO --> R1["💬 A single LLM call is enough"]
+  Q1 -- YES --> Q2{"Are the steps<br/>always the same?"}
+  Q2 -- YES --> R2["⚙️ Normal code / fixed pipeline<br/>no agent needed"]
+  Q2 -- NO --> Q3{"Does the next step depend<br/>on the previous result?"}
+  Q3 -- YES --> R3(["✅ USE AN AGENT"])
+  Q3 -- NO --> R2
 ```
 
 | Use an agent when... | Do NOT use an agent when... |
@@ -2296,26 +2198,13 @@ All of them use the same idea you built today: **LLM + tools + memory + loop**.
 
 You now understand the core of **every** AI agent framework.
 
-```text
-  You are here
-       │
-       ▼
-  [1] Single agent from scratch  ✔
-       │
-       ▼
-  [2] Add long-term memory (save history to a file / database)
-       │
-       ▼
-  [3] Add real tools (news, calendar, database, web search)
-       │
-       ▼
-  [4] Add a UI (Streamlit or Gradio)
-       │
-       ▼
-  [5] Try a framework (LangChain, Google ADK, CrewAI, OpenAI Agents SDK)
-       │
-       ▼
-  [6] Build a multi-agent system and connect tools with MCP
+```mermaid
+flowchart TD
+  S1["✅ 1. Single agent from scratch<br/><b>you are here</b>"] --> S2["2. Add long-term memory<br/>save history to a file / database"]
+  S2 --> S3["3. Add real tools<br/>news, calendar, database, web search"]
+  S3 --> S4["4. Add a UI<br/>Streamlit or Gradio"]
+  S4 --> S5["5. Try a framework<br/>LangChain, Google ADK, CrewAI, OpenAI Agents SDK"]
+  S5 --> S6["6. Build a multi-agent system<br/>and connect tools with MCP"]
 ```
 
 Ideas:
