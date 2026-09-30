@@ -508,6 +508,40 @@ If you get a reply, the model works. (If you started an interactive chat, type `
 
 ## 11. Create the Project
 
+### Before you start: how to create a file
+
+In this guide you will create several files (`requirements.txt`, `.env.example`, `config.py` and more). There are two ways to do it. Pick one.
+
+**Way 1: a code editor (easiest)**
+
+Open the project folder in VS Code (or any editor):
+
+```bash
+code .
+```
+
+Then click **New File**, type the exact file name (for example `config.py`), paste the content from this guide and press **Save** (`Cmd + S` on macOS, `Ctrl + S` on Windows/Linux).
+
+> If `code .` gives `command not found`, open VS Code, press `Cmd + Shift + P`, run **Shell Command: Install 'code' command in PATH**, then try again. Or just open the folder from VS Code's **File → Open Folder** menu.
+
+**Way 2: the terminal**
+
+For each file, this guide gives a ready-made command that creates the file with the right content. Copy the **whole** command block and paste it into the terminal.
+
+For long code files you can create an empty file and open it in an editor:
+
+```bash
+# macOS / Linux
+touch config.py
+open -e config.py        # macOS TextEdit (or: code config.py)
+
+# Windows (PowerShell)
+ni config.py
+notepad config.py
+```
+
+> **Common mistake:** do **not** type the *content* of a file (like `openai` or `python-dotenv`) directly into the terminal. The terminal treats each line as a command and shows `command not found`. File content always goes **inside a file**.
+
 ### 11.1 Create a folder
 
 ```bash
@@ -584,6 +618,24 @@ openai
 python-dotenv
 ```
 
+**Create it from the terminal:**
+
+```bash
+# macOS / Linux
+printf "openai\npython-dotenv\n" > requirements.txt
+
+# Windows (PowerShell)
+Set-Content requirements.txt "openai","python-dotenv"
+```
+
+Check the file:
+
+```bash
+cat requirements.txt        # Windows: type requirements.txt
+```
+
+You should see the two package names. If you get `Is a directory`, a **folder** named `requirements.txt` was created by mistake. Remove it with `rm -rf requirements.txt` and run the command above again.
+
 | Package | What it is | Why we need it |
 |---|---|---|
 | `openai` | A Python library for talking to chat LLM servers | Ollama, Gemini and Groq all understand the same "OpenAI-compatible" request format, so this **one** library can talk to all three. **We are not using OpenAI's paid service**, only its free library. |
@@ -634,7 +686,7 @@ We create **two** files:
 | `.env.example` | All setting **names**, with keys left **empty** | Yes. It is a template for others. |
 | `.env` | The **same** settings with **your real keys** | **Never** |
 
-Create **`.env.example`**:
+Create **`.env.example`** with this content:
 
 ```bash
 # Copy this file and name the copy .env, then fill in the values
@@ -652,6 +704,50 @@ GEMINI_MODEL=gemini-2.5-flash
 GROQ_API_KEY=
 GROQ_MODEL=openai/gpt-oss-20b
 ```
+
+**Create it from the terminal** (copy the whole block, including the last `EOF` line):
+
+```bash
+# macOS / Linux
+cat > .env.example <<'EOF'
+# Copy this file and name the copy .env, then fill in the values
+# PROVIDER options: ollama | gemini | groq   (all three are free)
+PROVIDER=ollama
+
+# Option 1: Ollama (local, no key needed)
+OLLAMA_MODEL=qwen2.5:7b
+
+# Option 2: Gemini free key -> https://aistudio.google.com/apikey
+GEMINI_API_KEY=
+GEMINI_MODEL=gemini-2.5-flash
+
+# Option 3: Groq free key -> https://console.groq.com/keys
+GROQ_API_KEY=
+GROQ_MODEL=openai/gpt-oss-20b
+EOF
+```
+
+```powershell
+# Windows (PowerShell)
+@'
+# Copy this file and name the copy .env, then fill in the values
+# PROVIDER options: ollama | gemini | groq   (all three are free)
+PROVIDER=ollama
+
+# Option 1: Ollama (local, no key needed)
+OLLAMA_MODEL=qwen2.5:7b
+
+# Option 2: Gemini free key -> https://aistudio.google.com/apikey
+GEMINI_API_KEY=
+GEMINI_MODEL=gemini-2.5-flash
+
+# Option 3: Groq free key -> https://console.groq.com/keys
+GROQ_API_KEY=
+GROQ_MODEL=openai/gpt-oss-20b
+'@ | Set-Content .env.example
+```
+
+`cat > .env.example <<'EOF'` means: *"write everything below into `.env.example` until you reach a line that says `EOF`"*. (`EOF` stands for **E**nd **O**f **F**ile.)
 
 **Line by line:**
 
@@ -687,13 +783,23 @@ copy .env.example .env
 
 **What is it?** If you put this project on GitHub, Git would upload **every** file. `.gitignore` is a list of files and folders Git should **skip**.
 
-Create **`.gitignore`**:
+Create **`.gitignore`** with this content:
 
 ```text
 venv/
 .env
 __pycache__/
 notes.txt
+```
+
+**Create it from the terminal:**
+
+```bash
+# macOS / Linux
+printf "venv/\n.env\n__pycache__/\nnotes.txt\n" > .gitignore
+
+# Windows (PowerShell)
+Set-Content .gitignore "venv/",".env","__pycache__/","notes.txt"
 ```
 
 | Line | Why we skip it |
@@ -725,7 +831,13 @@ flowchart TD
 
 Switching provider only changes three values: the server address (`base_url`), the key (`api_key`) and the model name. The agent code never changes.
 
-Create **`config.py`**:
+Create **`config.py`** and paste the code below into it:
+
+```bash
+touch config.py         # Windows (PowerShell): ni config.py
+```
+
+Then open it in your editor (`code config.py`), paste the code and save.
 
 ```python
 """
@@ -883,7 +995,13 @@ sequenceDiagram
   Note over Y,L: No tools, no loop
 ```
 
-Create **`step1_chat.py`**:
+Create **`step1_chat.py`** and paste the code below into it:
+
+```bash
+touch step1_chat.py         # Windows (PowerShell): ni step1_chat.py
+```
+
+Then open it in your editor (`code step1_chat.py`), paste the code and save.
 
 ```python
 """
@@ -1001,7 +1119,13 @@ flowchart LR
   D -- "the FUNCTIONS dict links the name<br/>get_weather to the real function" --> F
 ```
 
-Create **`tools.py`**:
+Create **`tools.py`** and paste the code below into it:
+
+```bash
+touch tools.py         # Windows (PowerShell): ni tools.py
+```
+
+Then open it in your editor (`code tools.py`), paste the code and save.
 
 ```python
 """
@@ -1242,7 +1366,13 @@ sequenceDiagram
   Note over Y,L: ...and then? The LLM has not seen the result yet.
 ```
 
-Create **`step2_tools.py`**:
+Create **`step2_tools.py`** and paste the code below into it:
+
+```bash
+touch step2_tools.py         # Windows (PowerShell): ni step2_tools.py
+```
+
+Then open it in your editor (`code step2_tools.py`), paste the code and save.
 
 ```python
 """
@@ -1365,7 +1495,13 @@ That repetition is the **agent loop**.
 
 ## 16. Step 4: The Agent Loop (Your First AI Agent)
 
-Create **`step3_agent.py`**:
+Create **`step3_agent.py`** and paste the code below into it:
+
+```bash
+touch step3_agent.py         # Windows (PowerShell): ni step3_agent.py
+```
+
+Then open it in your editor (`code step3_agent.py`), paste the code and save.
 
 ```python
 """
